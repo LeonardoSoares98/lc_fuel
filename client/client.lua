@@ -398,7 +398,7 @@ function GetClosestPump(coords, isElectric)
 		local currentPumpModel = nil
 		for i = 1, #Config.Electric.chargersProps, 1 do
 			currentPumpModel = Config.Electric.chargersProps[i].prop
-			pump = GetClosestObjectOfType(coords.x, coords.y, coords.z, 1.0, joaat(currentPumpModel), true, true, true)
+			pump = GetClosestObjectOfType(coords.x, coords.y, coords.z, 2.0, joaat(currentPumpModel), true, true, true)
 			if pump ~= 0 then break end
 		end
 		return pump, currentPumpModel
@@ -407,7 +407,7 @@ function GetClosestPump(coords, isElectric)
 		local currentPumpModel = nil
 		for i = 1, #Config.GasPumpProps, 1 do
 			currentPumpModel = Config.GasPumpProps[i].prop
-			pump = GetClosestObjectOfType(coords.x, coords.y, coords.z, 1.0, joaat(currentPumpModel), true, true, true)
+			pump = GetClosestObjectOfType(coords.x, coords.y, coords.z, 2.0, joaat(currentPumpModel), true, true, true)
 			if pump ~= 0 then break end
 		end
 		return pump, currentPumpModel
