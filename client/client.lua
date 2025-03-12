@@ -393,25 +393,17 @@ function IsVehicleDiesel(vehicle)
 end
 
 function GetClosestPump(coords, isElectric)
-	if isElectric then
-		local pump = nil
-		local currentPumpModel = nil
-		for i = 1, #Config.Electric.chargersProps, 1 do
-			currentPumpModel = Config.Electric.chargersProps[i].prop
-			pump = GetClosestObjectOfType(coords.x, coords.y, coords.z, 2.0, joaat(currentPumpModel), true, true, true)
-			if pump ~= 0 then break end
-		end
-		return pump, currentPumpModel
-	else
-		local pump = nil
-		local currentPumpModel = nil
-		for i = 1, #Config.GasPumpProps, 1 do
-			currentPumpModel = Config.GasPumpProps[i].prop
-			pump = GetClosestObjectOfType(coords.x, coords.y, coords.z, 2.0, joaat(currentPumpModel), true, true, true)
-			if pump ~= 0 then break end
-		end
-		return pump, currentPumpModel
-	end
+    local pump = nil
+    local currentPumpModel = nil
+    local pumpList = isElectric and Config.Electric.chargersProps or Config.GasPumpProps
+
+    for i = 1, #pumpList do
+        currentPumpModel = pumpList[i].prop
+        pump = GetClosestObjectOfType(coords.x, coords.y, coords.z, 2.5, joaat(currentPumpModel), true, true, true)
+        if pump ~= 0 then return pump, currentPumpModel end
+    end
+
+    return nil, nil
 end
 
 function createBlips()
