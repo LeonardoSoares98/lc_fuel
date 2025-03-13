@@ -477,7 +477,7 @@ Citizen.CreateThread(function()
 	-- Electrics
 	if Config.Electric.enabled then
 		CreateThread(function()
-			createElectricModelsThread()
+			createElectricZones()
 
 			if Utils.Config.custom_scripts_compatibility.target == "disabled" then
 				createElectricMarkersThread()
