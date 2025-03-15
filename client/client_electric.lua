@@ -4,57 +4,19 @@ if not Config.Electric.enabled then
 end
 
 local electricChargers = {}
-local chargerZones = {}
 
 -----------------------------------------------------------------------------------------------------------------------------------------
--- Group charging points by filling station (based on location)
+-- Threads
 -----------------------------------------------------------------------------------------------------------------------------------------
-local function groupChargersByStation()
-    local stations = {} 
 
-    for _, charger in pairs(Config.Electric.chargersLocation) do
-        local assigned = false
-
-        -- Check whether this column belongs to an existing filling station (within 20m)
-        for _, station in pairs(stations) do
-            local dist = #(vector3(station.center.x, station.center.y, station.center.z) - 
-                           vector3(charger.location.x, charger.location.y, charger.location.z))
-
-            if dist < 20.0 then -- If within 20m, add them to the existing group
-                table.insert(station.chargers, charger)
-                station.center = vector3(
-                    (station.center.x + charger.location.x) / 2,
-                    (station.center.y + charger.location.y) / 2,
-                    (station.center.z + charger.location.z) / 2
-                )
-                assigned = true
-                break
-            end
-        end
-
-        -- If no existing group is found, create a new petrol station zone
-        if not assigned then
-            table.insert(stations, {
-                center = vector3(charger.location.x, charger.location.y, charger.location.z),
-                chargers = {charger}
-            })
-        end
-    end
-
-    return stations
-end
-
------------------------------------------------------------------------------------------------------------------------------------------
--- Charge/discharge all columns per filling station based on the zone
------------------------------------------------------------------------------------------------------------------------------------------
+-- Create sphere zones for each station, hooking up onEnter/onExit
 function createElectricZones()
-    local stations = groupChargersByStation() -- Group charging stations by filling station
+    local stations = groupChargersByStation()
 
     for _, station in pairs(stations) do
-        local zone = lib.zones.sphere({
+        Utils.Zones.createZone({
             coords = station.center,
             radius = 50.0,
-            debug = false,
             onEnter = function()
                 for _, charger in pairs(station.chargers) do
                     loadElectricCharger(charger)
@@ -66,48 +28,10 @@ function createElectricZones()
                 end
             end
         })
-        table.insert(chargerZones, zone)
     end
 end
 
------------------------------------------------------------------------------------------------------------------------------------------
--- Load a gas pump when a player enters the gas station zone
------------------------------------------------------------------------------------------------------------------------------------------
-function loadElectricCharger(chargerData)
-    if not electricChargers[chargerData.location] then
-		RequestModel(chargerData.prop)
-        while not HasModelLoaded(chargerData.prop) do Wait(50) end
-
-		local heading = chargerData.location.w + 180.0
-		local electricCharger = CreateObject(chargerData.prop, chargerData.location.x, chargerData.location.y, chargerData.location.z, false, true, true)
-		SetEntityHeading(electricCharger, heading)
-		FreezeEntityPosition(electricCharger, true)
-
-        electricChargers[chargerData.location] = electricCharger
-	end
-end
-
------------------------------------------------------------------------------------------------------------------------------------------
--- Remove a petrol pump when no player is left in the petrol station zone
------------------------------------------------------------------------------------------------------------------------------------------
-function unloadElectricCharger(chargerData)
-    local charger = electricChargers[chargerData.location]
-    if charger and DoesEntityExist(charger) then
-        DeleteEntity(charger)
-        electricChargers[chargerData.location] = nil
-    end
-end
-
------------------------------------------------------------------------------------------------------------------------------------------
--- Threads
------------------------------------------------------------------------------------------------------------------------------------------
-
--- Start zones for all filling stations (instead of individual pumps)
-CreateThread(function()
-    createElectricZones()
-end)
-
--- Thread for recognizing nearby chargepoints
+-- Thread to detect near electric chargers
 function createElectricMarkersThread()
 	CreateThread(function()
 		while true do
@@ -150,10 +74,7 @@ function openElectricUICallback()
 	local ped = PlayerPedId()
 	local playerCoords = GetEntityCoords(ped)
 	local pump, pumpModel = GetClosestPump(playerCoords, true)
-
-	local pCoords = GetEntityCoords(cache.ped)
-	local vehicle, vehicleCoords = lib.getClosestVehicle(pCoords, 5.0, false)
-	if pump and vehicle then
+	if pump then
 		clientOpenUI(pump, pumpModel, true)
 	else
 		exports['lc_utils']:notify("error", Utils.translate("pump_not_found"))
@@ -164,16 +85,65 @@ end
 -- Utils
 -----------------------------------------------------------------------------------------------------------------------------------------
 
+function loadElectricCharger(chargerData)
+    if not electricChargers[chargerData.location] then
+        RequestModel(chargerData.prop)
+        while not HasModelLoaded(chargerData.prop) do
+            Wait(10)
+        end
+
+        local heading = chargerData.location.w + 180.0
+        local electricCharger = CreateObject(chargerData.prop, chargerData.location.x, chargerData.location.y, chargerData.location.z, false, true, true)
+        SetEntityHeading(electricCharger, heading)
+        FreezeEntityPosition(electricCharger, true)
+
+        electricChargers[chargerData.location] = electricCharger
+    end
+end
+
+function unloadElectricCharger(chargerData)
+    local charger = electricChargers[chargerData.location]
+    if charger and DoesEntityExist(charger) then
+        DeleteEntity(charger)
+        electricChargers[chargerData.location] = nil
+    end
+end
+
+-- Utility to group chargers by their station
+function groupChargersByStation()
+    local stations = {}
+    for _, charger in pairs(Config.Electric.chargersLocation) do
+        local assigned = false
+        for _, station in pairs(stations) do
+            local dist = #(station.center - vector3(charger.location.x, charger.location.y, charger.location.z))
+            if dist < 20.0 then
+                table.insert(station.chargers, charger)
+                station.center = (station.center + vector3(charger.location.x, charger.location.y, charger.location.z)) / 2
+                assigned = true
+                break
+            end
+        end
+        if not assigned then
+            table.insert(stations, {
+                center = vector3(charger.location.x, charger.location.y, charger.location.z),
+                chargers = { charger }
+            })
+        end
+    end
+    return stations
+end
+
 AddEventHandler('onResourceStop', function(resourceName)
 	if GetCurrentResourceName() ~= resourceName then return end
+
 	deleteAllElectricChargers()
 end)
 
 function deleteAllElectricChargers()
     for _, charger in pairs(electricChargers) do
-        if charger and DoesEntityExist(charger) then
+        if DoesEntityExist(charger) then
             DeleteEntity(charger)
-	end
-end
+        end
+    end
     electricChargers = {}
 end
