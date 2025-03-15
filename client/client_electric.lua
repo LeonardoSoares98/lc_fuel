@@ -9,21 +9,26 @@ local electricChargers = {}
 -- Threads
 -----------------------------------------------------------------------------------------------------------------------------------------
 
--- Load the custom electric charger models
-function createElectricModelsThread()
-	for _, chargerData in pairs(Config.Electric.chargersLocation) do
-		RequestModel(chargerData.prop)
+-- Create sphere zones for each station, hooking up onEnter/onExit
+function createElectricZones()
+    local stations = groupChargersByStation()
 
-		while not HasModelLoaded(chargerData.prop) do
-			Wait(50)
-		end
-
-		local heading = chargerData.location.w + 180.0
-		local electricCharger = CreateObject(chargerData.prop, chargerData.location.x, chargerData.location.y, chargerData.location.z, false, true, true)
-		SetEntityHeading(electricCharger, heading)
-		FreezeEntityPosition(electricCharger, true)
-		table.insert(electricChargers, electricCharger)
-	end
+    for _, station in pairs(stations) do
+        Utils.Zones.createZone({
+            coords = station.center,
+            radius = 50.0,
+            onEnter = function()
+                for _, charger in pairs(station.chargers) do
+                    loadElectricCharger(charger)
+                end
+            end,
+            onExit = function()
+                for _, charger in pairs(station.chargers) do
+                    unloadElectricCharger(charger)
+                end
+            end
+        })
+    end
 end
 
 -- Thread to detect near electric chargers
@@ -80,6 +85,54 @@ end
 -- Utils
 -----------------------------------------------------------------------------------------------------------------------------------------
 
+function loadElectricCharger(chargerData)
+    if not electricChargers[chargerData.location] then
+        RequestModel(chargerData.prop)
+        while not HasModelLoaded(chargerData.prop) do
+            Wait(10)
+        end
+
+        local heading = chargerData.location.w + 180.0
+        local electricCharger = CreateObject(chargerData.prop, chargerData.location.x, chargerData.location.y, chargerData.location.z, false, true, true)
+        SetEntityHeading(electricCharger, heading)
+        FreezeEntityPosition(electricCharger, true)
+
+        electricChargers[chargerData.location] = electricCharger
+    end
+end
+
+function unloadElectricCharger(chargerData)
+    local charger = electricChargers[chargerData.location]
+    if charger and DoesEntityExist(charger) then
+        DeleteEntity(charger)
+        electricChargers[chargerData.location] = nil
+    end
+end
+
+-- Utility to group chargers by their station
+function groupChargersByStation()
+    local stations = {}
+    for _, charger in pairs(Config.Electric.chargersLocation) do
+        local assigned = false
+        for _, station in pairs(stations) do
+            local dist = #(station.center - vector3(charger.location.x, charger.location.y, charger.location.z))
+            if dist < 20.0 then
+                table.insert(station.chargers, charger)
+                station.center = (station.center + vector3(charger.location.x, charger.location.y, charger.location.z)) / 2
+                assigned = true
+                break
+            end
+        end
+        if not assigned then
+            table.insert(stations, {
+                center = vector3(charger.location.x, charger.location.y, charger.location.z),
+                chargers = { charger }
+            })
+        end
+    end
+    return stations
+end
+
 AddEventHandler('onResourceStop', function(resourceName)
 	if GetCurrentResourceName() ~= resourceName then return end
 
@@ -87,7 +140,10 @@ AddEventHandler('onResourceStop', function(resourceName)
 end)
 
 function deleteAllElectricChargers()
-	for k, v in ipairs(electricChargers) do
-		DeleteEntity(v)
-	end
+    for _, charger in pairs(electricChargers) do
+        if DoesEntityExist(charger) then
+            DeleteEntity(charger)
+        end
+    end
+    electricChargers = {}
 end
