@@ -409,7 +409,7 @@ function attachNozzleToVehicle(closestVehicle, customVehicleParameters)
 	DetachEntity(fuelNozzle, true, true)
 
 	-- Find the appropriate bone for the fuel cap
-	local tankBones = { "petrolcap", "petroltank", "petroltank_l", "petroltank_r", "wheel_lr", "wheel_lf", "engine" }
+	local tankBones = vehicleCapBoneList()
 	local boneIndex = -1
 
 	for _, boneName in ipairs(tankBones) do

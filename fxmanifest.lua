@@ -1,6 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 author 'LixeiroCharmoso'
+name 'lc_fuel'
 
 ui_page "nui/ui.html"
 
@@ -46,7 +47,7 @@ exports {
 }
 
 dependency "lc_utils"
-provide "LegacyFuel"
+provides 'LegacyFuel'
 
 data_file 'DLC_ITYP_REQUEST' 'stream/prop_electric_01.ytyp'
 data_file 'DLC_ITYP_REQUEST' 'stream/prop_eletricpistol.ytyp'
