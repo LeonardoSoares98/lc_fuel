@@ -39,6 +39,7 @@ function createFuelConsumptionThread()
 				local vehicle = GetVehiclePedIsIn(ped, false)
 				if GetPedInVehicleSeat(vehicle, -1) == ped and not IsVehicleBlacklisted(vehicle) then
 					if currentVehiclePlate == nil then
+						currentVehiclePlate = GetVehicleNumberPlateText(vehicle)
 						currentVehicleFuelType = getVehicleFuelTypeFromServer(vehicle)
 					end
 					HandleFuelConsumption(vehicle, currentVehicleFuelType)
