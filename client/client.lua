@@ -28,29 +28,30 @@ end
 
 -- Thread to handle the fuel consumption
 function createFuelConsumptionThread()
-	CreateThread(function()
-		local currentVehiclePlate = nil
-		local currentVehicleFuelType = "default" -- default while the callback loads
-		DecorRegister(fuelDecor, 1)
-		while true do
-			Wait(1000)
-			local ped = PlayerPedId()
-			if IsPedInAnyVehicle(ped, false) then
-				local vehicle = GetVehiclePedIsIn(ped, false)
-				if GetPedInVehicleSeat(vehicle, -1) == ped and not IsVehicleBlacklisted(vehicle) then
-					if currentVehiclePlate == nil then
-						currentVehiclePlate = GetVehicleNumberPlateText(vehicle)
-						currentVehicleFuelType = getVehicleFuelTypeFromServer(vehicle)
-					end
-					HandleFuelConsumption(vehicle, currentVehicleFuelType)
-				end
-			else
-				currentVehicleFuelType = "default"
-				currentVehiclePlate = nil
-				fuelSynced = false
-			end
-		end
-	end)
+    CreateThread(function()
+        local currentVehicle = nil
+        local currentVehicleFuelType = "default" -- default while the callback loads
+        DecorRegister(fuelDecor, 1)
+        while true do
+            Wait(1000)
+            local ped = PlayerPedId()
+            if IsPedInAnyVehicle(ped, false) then
+                local vehicle = GetVehiclePedIsIn(ped, false)
+                if GetPedInVehicleSeat(vehicle, -1) == ped and not IsVehicleBlacklisted(vehicle) then
+                    if currentVehicle == nil or currentVehicle ~= vehicle then
+                        currentVehicle = vehicle
+                        currentVehicleFuelType = getVehicleFuelTypeFromServer(vehicle)
+                        fuelSynced = false
+                    end
+                    HandleFuelConsumption(vehicle, currentVehicleFuelType)
+                end
+            else
+                currentVehicleFuelType = "default"
+                currentVehicle = nil
+                fuelSynced = false
+            end
+        end
+    end)
 end
 
 function HandleFuelConsumption(vehicle, fuelType)
