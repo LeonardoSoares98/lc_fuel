@@ -498,7 +498,7 @@ Citizen.CreateThread(function()
 	-- Electrics
 	if Config.Electric.enabled then
 		CreateThread(function()
-			createElectricModelsThread()
+			createElectricZones()
 
 			if Utils.Config.custom_scripts_compatibility.target == "disabled" then
 				createElectricMarkersThread()
@@ -960,8 +960,7 @@ Config.HiddenCustomVehicleParameters = {
 	["bfinjection"] =  { distance = 1.3, nozzleOffset = { forward = 0.60, right = 0.02, up = 0.35} },
 	["bifta"] =  { distance = 1.3, nozzleOffset = { forward = 0.03, right = -0.65, up = 0.10} },
 
-
--- offroad
+    -- offroad
 	["blazer"] =  { distance = 1.3, nozzleOffset = { forward = -0.08, right = -0.29, up = 0.20} },
 	["blazer2"] =  { distance = 1.3, nozzleOffset = { forward = -0.05, right = -0.25, up = 0.25} },
 	["blazer3"] =  { distance = 1.3, nozzleOffset = { forward = -0.05, right = -0.25, up = 0.15} },
@@ -1223,4 +1222,37 @@ Config.HiddenCustomVehicleParameters = {
 	["seasparrow3"] = { distance = 1.5, nozzleOffset = { forward = -0.10, right = -0.70, up = 0.00}, nozzleRotation = { x = 0, y = 0, z = 0} },
 	["skylift"] = { distance = 4.0, nozzleOffset = { forward = 4.95, right = 0.00, up = -3.50}, nozzleRotation = { x = 0, y = 0, z = 90} },
 	["maverick"] = { distance = 3.5, nozzleOffset = { forward = 0.00, right = -0.90, up = -1.50}, nozzleRotation = { x = 0, y = 0, z = 20} },
+
+    -- Boats
+	["toro"] = { distance = 1.5, nozzleOffset = { forward = 0.0, right = -0.75, up = 0.48 } , nozzleRotation = { x = -75, y = 0, z = 90} },
+	["toro2"] = { distance = 1.5, nozzleOffset = { forward = 0.0, right = -0.75, up = 0.48 } , nozzleRotation = { x = -75, y = 0, z = 90} },
+	["patrolboat"] = { distance = 1.0, nozzleOffset = { forward = -0.30, right = 0.25, up = 0.20 } , nozzleRotation = { x = 0, y = 0, z = 180} },
+	["longfin"] = { distance = 1.5, nozzleOffset = { forward = 0.90 , right = -1.40, up = 0.68} , nozzleRotation = { x = -75, y = 0, z = 90} },
+	["speeder"] = { distance = 1.5, nozzleOffset = { forward = 0.0, right = -0.95, up = 0.65 } , nozzleRotation = { x = -75, y = 0, z = 90} },
+	["speeder2"] = { distance = 1.5, nozzleOffset = { forward = 0.0, right = -0.95, up = 0.65 } , nozzleRotation = { x = -75, y = 0, z = 90} },
+	["tropic"] = { distance = 2.0, nozzleOffset = { forward = 1.00, right = -1.15, up = 0.71} , nozzleRotation = { x = -75, y = 0, z = 90} },
+	["tropic2"] = { distance = 2.0, nozzleOffset = { forward = 1.00, right = -1.15, up = 0.71} , nozzleRotation = { x = -75, y = 0, z = 90} },
+	["suntrap"] = { distance = 2.0, nozzleOffset = { forward = 0.55, right = -0.95, up = 0.93} , nozzleRotation = { x = -75, y = 0, z = 90} },
+	["squalo"] = { distance = 1.5, nozzleOffset = { forward = 0.0, right = -0.95, up = 0.57 } , nozzleRotation = { x = -60, y = 0, z = 90} },  -- jet surf
+	["marquis"] = { distance = 1.5, nozzleOffset = { forward = 0.50, right = -1.35, up = 1.36 } , nozzleRotation = { x = -75, y = 0, z = 90} },
+	["jetmax"] = { distance = 2.0, nozzleOffset = { forward = 0.50, right = -0.90, up = 0.54 } , nozzleRotation = { x = -75, y = 0, z = 90} },
+	["dinghy"] = { distance = 1.0, nozzleOffset = { forward = -0.20, right = -0.69, up = 0.50 } , nozzleRotation = { x = 0, y = 0, z = 0} },
+	["dinghy2"] = { distance = 1.0, nozzleOffset = { forward = -0.20, right = -0.69, up = 0.50 } , nozzleRotation = { x = 0, y = 0, z = 0} },
+	["dinghy3"] = { distance = 1.0, nozzleOffset = { forward = -0.20, right = -0.69, up = 0.50 } , nozzleRotation = { x = 0, y = 0, z = 0} },
+	["dinghy4"] = { distance = 1.0, nozzleOffset = { forward = -0.20, right = -0.69, up = 0.50 } , nozzleRotation = { x = 0, y = 0, z = 0} },	
+	["dinghy5"] = { distance = 1.0, nozzleOffset = { forward = -0.20, right = -0.69, up = 0.50 } , nozzleRotation = { x = 0, y = 0, z = 0} },	
+
+    -- Jet
+	["seashark"] = { distance = 2.0, nozzleOffset = { forward = 0.89, right = 0.00, up = 0.42 } , nozzleRotation = { x = -60, y = 0, z = 90} },
+	["seashark3"] = { distance = 2.0, nozzleOffset = { forward = 0.89, right = 0.00, up = 0.42 } , nozzleRotation = { x = -60, y = 0, z = 90} },
+	["seashark2"] = { distance = 2.0, nozzleOffset = { forward = 0.89, right = 0.00, up = 0.42 } , nozzleRotation = { x = -60, y = 0, z = 90} },
+
+    -- Submarine
+	["avisa"] = { distance = 2.0, nozzleOffset = { forward = -0.40, right = -1.30, up = 0.14 }  , nozzleRotation = { x = -85, y = 0, z = 90} },
+	["submersible2"] = { distance = 2.5, nozzleOffset = { forward = -0.40, right = -0.70, up = 1.20 }  , nozzleRotation = { x = -90, y = 0, z = 0} },
+	["submersible"] = { distance = 2.5, nozzleOffset = { forward = -0.60, right = -0.85, up = 1.20 }  , nozzleRotation = { x = -90, y = 0, z = 0} },
+
+    -- Big boats
+--	["kosatka"] = { distance = 6.0, nozzleOffset = { forward = 0.0, right = -0.15, up = 1.0 } },   ----- BIG SUBMARINE
+	["tug"] = { distance = 2.5, nozzleOffset = { forward = 0.0, right = 0.79, up = 0.20} , nozzleRotation = { x = 0, y = 0, z = 180} },
 }
