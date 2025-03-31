@@ -337,6 +337,14 @@ function canDetachNozzleTargetCallback(entity, distance)
     return false
 end
 
+function canOpenPumpUiTargetCallback()
+    return not DoesEntityExist(fuelNozzle)
+end
+
+function canReturnNozzleTargetCallback()
+    return DoesEntityExist(fuelNozzle)
+end
+
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- Utils
 -----------------------------------------------------------------------------------------------------------------------------------------

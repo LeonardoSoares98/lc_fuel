@@ -227,24 +227,7 @@ function getCurrentGasStationId(source)
 end
 
 function getStationData(gasStationId)
-	local stationData = {
-		pricePerLiter = {
-			regular = Config.DefaultValues.fuelPrice.regular,
-			plus = Config.DefaultValues.fuelPrice.plus,
-			premium = Config.DefaultValues.fuelPrice.premium,
-			diesel = Config.DefaultValues.fuelPrice.diesel,
-			electricfast = Config.Electric.chargeTypes.fast.price,
-			electricnormal = Config.Electric.chargeTypes.normal.price,
-		},
-		stationStock = {
-			regular = Config.DefaultValues.fuelStock.regular and 100 or 0,
-			plus = Config.DefaultValues.fuelStock.plus and 100 or 0,
-			premium = Config.DefaultValues.fuelStock.premium and 100 or 0,
-			diesel = Config.DefaultValues.fuelStock.diesel and 100 or 0,
-			electricfast = Config.Electric.chargeTypes.fast.stock and 100 or 0,
-			electricnormal = Config.Electric.chargeTypes.normal.stock and 100 or 0,
-		}
-	}
+	local stationData = getStationDataFromConfig()
 	if not gasStationId then
 		return stationData
 	end
@@ -282,14 +265,21 @@ function getStationData(gasStationId)
 end
 
 function removeStockFromStation(gasStationId, pricePaid, fuelAmount, fuelType, isJerryCan)
-	if not gasStationId then
-		return true
-	end
+    if not isFuelTypeValid(fuelType) then
+        print("Invalid fuel type: "..(fuelType or "nil"))
+        return false
+    end
 
-	if not isFuelTypeValid(fuelType) then
-		print("Invalid fuel type: "..(fuelType or "nil"))
-		return false
-	end
+    -- If not owned
+    if not gasStationId then
+        local stationData = getStationDataFromConfig()
+        if stationData.stationStock[fuelType] >= fuelAmount then
+            -- If set in config to have stock
+            return true
+        else
+            return false
+        end
+    end
 
 	local column = "stock_"..fuelType
 	if fuelType == "regular" then
@@ -340,6 +330,27 @@ end
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- Utils functions
 -----------------------------------------------------------------------------------------------------------------------------------------
+
+function getStationDataFromConfig()
+    return {
+        pricePerLiter = {
+            regular = Config.DefaultValues.fuelPrice.regular,
+            plus = Config.DefaultValues.fuelPrice.plus,
+            premium = Config.DefaultValues.fuelPrice.premium,
+            diesel = Config.DefaultValues.fuelPrice.diesel,
+            electricfast = Config.Electric.chargeTypes.fast.price,
+            electricnormal = Config.Electric.chargeTypes.normal.price,
+        },
+        stationStock = {
+            regular = Config.DefaultValues.fuelStock.regular and 100 or 0,
+            plus = Config.DefaultValues.fuelStock.plus and 100 or 0,
+            premium = Config.DefaultValues.fuelStock.premium and 100 or 0,
+            diesel = Config.DefaultValues.fuelStock.diesel and 100 or 0,
+            electricfast = Config.Electric.chargeTypes.fast.stock and 100 or 0,
+            electricnormal = Config.Electric.chargeTypes.normal.stock and 100 or 0,
+        }
+    }
+end
 
 function isFuelTypeValid(fuelType)
 	return Utils.Table.contains({"regular", "plus", "premium", "diesel", "electricfast", "electricnormal"}, fuelType)
