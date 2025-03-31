@@ -31,17 +31,9 @@ function createGasTargetsThread()
 	for _, v in pairs(Config.GasPumpProps) do
 		table.insert(pumpModels, v.prop)
 	end
-	Utils.Target.createTargetForModel(pumpModels,openFuelUICallback,Utils.translate('target.open_refuel'),"fas fa-gas-pump","#a42100",nil,nil,canOpenGasPumpUiTargetCallback)
+	Utils.Target.createTargetForModel(pumpModels,openFuelUICallback,Utils.translate('target.open_refuel'),"fas fa-gas-pump","#a42100",nil,nil,canOpenPumpUiTargetCallback)
 
 	Utils.Target.createTargetForModel(pumpModels,returnNozzle,Utils.translate('target.return_nozzle'),"fas fa-gas-pump","#a42100",nil,nil,canReturnNozzleTargetCallback)
-end
-
-function canOpenGasPumpUiTargetCallback()
-    return not DoesEntityExist(fuelNozzle)
-end
-
-function canReturnNozzleTargetCallback()
-    return DoesEntityExist(fuelNozzle)
 end
 
 function openFuelUICallback()

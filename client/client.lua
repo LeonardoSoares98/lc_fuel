@@ -95,22 +95,30 @@ end
 -- UI
 -----------------------------------------------------------------------------------------------------------------------------------------
 
-function clientOpenUI(pump, pumpModel, isElectric)
-	currentPump = pump
-	local ped = PlayerPedId()
-	local playerCoords = GetEntityCoords(ped)
-	closestVehicleToPump = GetClosestVehicle(playerCoords)
-	pumpLocation = nil
+function clientOpenUI(pump, pumpModel, isElectricPump)
+    currentPump = pump
+    local ped = PlayerPedId()
+    local playerCoords = GetEntityCoords(ped)
 
-	if closestVehicleToPump and #(playerCoords - GetEntityCoords(closestVehicleToPump)) < 5 then
-		-- Load the nearest vehicle fuel and plate (fuel type)
-		local vehicleFuel = GetFuel(closestVehicleToPump)
-		local vehiclePlate = GetVehicleNumberPlateText(closestVehicleToPump)
-		TriggerServerEvent("lc_fuel:serverOpenUI", isElectric, pumpModel, vehicleFuel, vehiclePlate)
-	else
-		-- Allow the user to open the UI even without vehicles nearby
-		TriggerServerEvent("lc_fuel:serverOpenUI", isElectric, pumpModel)
-	end
+    closestVehicleToPump = GetClosestVehicle(playerCoords)
+    local closestVehicleHash = GetEntityModel(closestVehicleToPump)
+    local isElectricVehicle = Config.Electric.vehiclesListHash[closestVehicleHash]
+    if not (isElectricVehicle and isElectricPump) and not (not isElectricVehicle and  not isElectricPump) then
+        -- Reset the near vehicle to 0 when it does not match the pump type (only allows electric vehicle in electric chargers and gas vehicles in gas pumps)
+        closestVehicleToPump = 0
+    end
+
+    pumpLocation = nil
+
+    if closestVehicleToPump and #(playerCoords - GetEntityCoords(closestVehicleToPump)) < 5 then
+        -- Load the nearest vehicle fuel and plate (fuel type)
+        local vehicleFuel = GetFuel(closestVehicleToPump)
+        local vehiclePlate = GetVehicleNumberPlateText(closestVehicleToPump)
+        TriggerServerEvent("lc_fuel:serverOpenUI", isElectricPump, pumpModel, vehicleFuel, vehiclePlate)
+    else
+        -- Allow the user to open the UI even without vehicles nearby
+        TriggerServerEvent("lc_fuel:serverOpenUI", isElectricPump, pumpModel)
+    end
 end
 
 function loadNuiVariables()
