@@ -118,7 +118,8 @@ AddEventHandler("lc_fuel:returnNozzle",function(remainingFuel, isElectric)
             return
         end
 
-        local amountToReturn = math.floor(remainingFuel * fuelPurchased[source].pricePerLiter)
+        local discount = getPlayerDiscountAmount(source)
+        local amountToReturn = math.floor(remainingFuel * (fuelPurchased[source].pricePerLiter * (1 - (discount / 100))))
 
         if amountToReturn > fuelPurchased[source].finalPrice or remainingFuel > fuelPurchased[source].fuelAmount then
             print("User "..user_id.." initially purchased "..fuelPurchased[source].fuelAmount.."L of fuel but now is returning "..remainingFuel.."L. Is this user trying to glitch something?")
