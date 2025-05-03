@@ -459,6 +459,7 @@ Citizen.CreateThread(function()
     -- Startup queries
     runCreateTableQueries()
     cacheplayerVehiclesFuelTypeType()
+    CleanupUnownedVehicleFuelData()
 
     -- Config checker
     assert(Config.FuelConsumptionPerClass, "^3You have errors in your config file, consider fixing it or redownload the original config.^7")
@@ -505,4 +506,17 @@ function runCreateTableQueries()
         ENGINE=InnoDB
         ;
     ]])
+end
+
+function CleanupUnownedVehicleFuelData()
+    local query = [[
+        DELETE FROM player_vehicles_fuel_type
+        WHERE UPPER(TRIM(plate)) NOT IN (
+            SELECT UPPER(TRIM(plate)) FROM player_vehicles
+        );
+    ]]
+
+    MySQL.update(query, {}, function(rowsChanged)
+        print(('[lc_fuel] Cleaned up %s unowned vehicle fuel entries.'):format(rowsChanged or 0))
+    end)
 end
