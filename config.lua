@@ -372,6 +372,14 @@ Config.BlacklistedVehicles = {
     "tribike3",
 }
 
+-- Enable this to assist in configuring Config.CustomVehicleParameters for custom vehicles.
+-- Steps:
+-- 1) Aim at the vehicle (a small red dot will appear) and find the correct nozzle position.
+-- 2) Press E to copy the offset and rotation to your clipboard.
+-- 3) Paste the copied line into the Config.CustomVehicleParameters list.
+-- IMPORTANT: Make sure the vehicle spawn name is correct. And you may still need to fine-tune the position and rotation values.
+Config.DebugNozzleOffset = false
+
 -- Custom parameters based on vehicle (Add vehicles in this list is optional, but if you want everything to be perfect, then you should).
 Config.CustomVehicleParameters = {
     ["default"] = { 			-- Default configuration for vehicles not listed in this list
