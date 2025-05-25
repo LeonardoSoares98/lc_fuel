@@ -37,5 +37,10 @@ Lang['fr'] = {
         ['balance_electric'] = "Charge électrique vendue (%s kWh)",
         ['refund_fuel'] = "Carburant remboursé (%s litres)",
         ['refund_electric'] = "Recharge électrique remboursée (%s kWh)",
-    }
+    },
+    ['fuel_type'] = "Type de carburant :",
+    ['diesel'] = "Diesel",
+    ['electric'] = "Électrique",
+    ['gasoline'] = "Essence",
+
 }

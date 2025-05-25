@@ -37,5 +37,9 @@ Lang['ja'] = {
         ['balance_electric'] = "電気充電販売 (%s kWh)",
         ['refund_fuel'] = "燃料が返金されました（%sリットル）",
         ['refund_electric'] = "電気充電が返金されました（%s kWh）",
-    }
+    },
+    ['fuel_type'] = "燃料タイプ：",
+    ['diesel'] = "ディーゼル",
+    ['electric'] = "電気",
+    ['gasoline'] = "ガソリン"
 }

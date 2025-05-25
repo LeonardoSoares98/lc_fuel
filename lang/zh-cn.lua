@@ -37,5 +37,9 @@ Lang['zh-cn'] = {
         ['balance_electric'] = "电能销售收入 (%s 千瓦时)",
         ['refund_fuel'] = "燃料已退款（%s 升）",
         ['refund_electric'] = "电力已退款（%s 千瓦时）",
-    }
+    },
+    ['fuel_type'] = "燃料类型：",
+    ['diesel'] = "柴油",
+    ['electric'] = "电动",
+    ['gasoline'] = "汽油",
 }

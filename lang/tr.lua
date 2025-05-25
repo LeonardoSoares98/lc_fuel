@@ -37,5 +37,9 @@ Lang['tr'] = {
         ['balance_electric'] = "Elektrik şarjı satıldı (%s kWh)",
         ['refund_fuel'] = "Yakıt iade edildi (%s litre)",
         ['refund_electric'] = "Elektrik şarjı iade edildi (%s kWh)",
-    }
+    },
+    ['fuel_type'] = "Yakıt Türü:",
+    ['diesel'] = "Dizel",
+    ['electric'] = "Elektrikli",
+    ['gasoline'] = "Benzin",
 }

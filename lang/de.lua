@@ -37,5 +37,9 @@ Lang['de'] = {
         ['balance_electric'] = "Elektrische Ladung verkauft (%s kWh)",
         ['refund_fuel'] = "Kraftstoff erstattet (%s Liter)",
         ['refund_electric'] = "Stromladung erstattet (%s kWh)",
-    }
+    },
+    ['fuel_type'] = "Treibstoff:",
+    ['diesel'] = "Diesel",
+    ['electric'] = "Elektrisch",
+    ['gasoline'] = "Benzin",
 }

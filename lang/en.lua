@@ -37,5 +37,9 @@ Lang['en'] = {
         ['balance_electric'] = "Electric charge sold (%s kWh)",
         ['refund_fuel'] = "Fuel refunded (%s Liters)",
         ['refund_electric'] = "Electric charge refunded (%s kWh)",
-    }
+    },
+    ['fuel_type'] = "Fuel Type:",
+    ['diesel'] = "Diesel",
+    ['electric'] = "Electric",
+    ['gasoline'] = "Gasoline",
 }
