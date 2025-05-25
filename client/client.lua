@@ -1,6 +1,6 @@
 -- Shared variables
 Utils = Utils or exports['lc_utils']:GetUtils()
-cachedTranslations = {}
+cachedTranslationsr = {}
 mainUiOpen = false
 
 fuelNozzle = 0
@@ -90,6 +90,10 @@ function HandleFuelConsumption(vehicle, fuelType)
     -- Base consumption from config and RPM
     currentConsumption = Config.FuelUsage[Utils.Math.round(GetVehicleCurrentRpm(vehicle), 1)] * (Config.FuelConsumptionPerClass[GetVehicleClass(vehicle)] or 1.0) * (Config.FuelConsumptionPerFuelType[fuelType] or 1.0) / 10
 
+    -- Only consume fuel when accelerating
+    if not IsControlPressed(0, 71) then -- 71 is INPUT_VEH_ACCELERATE
+        currentConsumption = Config.FuelUsage[0.1] * (Config.FuelConsumptionPerClass[GetVehicleClass(vehicle)] or 1.0) * (Config.FuelConsumptionPerFuelType[fuelType] or 1.0) / 10
+    end
     -- Scale consumption according to tank size.
     -- A smaller tank will lose percentage faster; a bigger tank slower.
     local scaledConsumption = currentConsumption * (100 / tankSize)
@@ -118,89 +122,6 @@ function validateDieselFuelMismatch(vehicle, fuelType)
             end
         end)
     end
-end
-
-function createDebugNozzleOffsetThread()
-    CreateThread(function()
-        while true do
-            local vehicle = GetVehiclePlayerIsLookingAt()
-            if not vehicle or not DoesEntityExist(vehicle) then
-                Wait(2)
-                goto continue -- Skip if no valid vehicle found
-            end
-
-            local hit, hitCoords = GetLookAtHitCoords()
-            if hit and DoesEntityExist(vehicle) then
-                local offset = GetNozzleOffset(vehicle, hitCoords)
-
-                if offset then
-                    local vehCoords = GetEntityCoords(vehicle)
-
-                    -- Get vehicle's axis vectors
-                    local forwardVector, rightVector, upVector = GetEntityMatrix(vehicle)
-
-                    -- Direction from vehicle to hit point
-                    local directionToHit = hitCoords - vehCoords
-                    directionToHit = directionToHit / #(directionToHit) -- normalize
-
-                    -- Dot product with right vector
-                    local side = rightVector.x * directionToHit.x + rightVector.y * directionToHit.y + rightVector.z * directionToHit.z
-
-                    -- Adjust offset.right
-                    if side > 0 then
-                        -- hit is on the right side
-                        offset.right = offset.right + 0.07
-                    else
-                        -- hit is on the left side
-                        offset.right = offset.right - 0.07
-                    end
-
-                    local boneWorldPos = GetVehicleCapPos(vehicle)
-
-                    -- local forwardVector, rightVector, upVector, _ = GetEntityMatrix(vehicle)
-
-                    -- Scale vectors by the local offset
-                    local forwardOffset = forwardVector * offset.forward
-                    local rightOffset = rightVector * offset.right
-                    local upOffset = upVector * offset.up
-
-                    -- Final world position of the nozzle point
-                    local finalWorldPos = vector3(
-                        boneWorldPos.x + forwardOffset.x + rightOffset.x + upOffset.x,
-                        boneWorldPos.y + forwardOffset.y + rightOffset.y + upOffset.y,
-                        boneWorldPos.z + forwardOffset.z + rightOffset.z + upOffset.z
-                    )
-
-                    -- Draw a small marker at the computed position
-                    DrawMarker(28, finalWorldPos.x, finalWorldPos.y, finalWorldPos.z + 0.05, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.03, 0.03, 0.03, 255, 0, 0, 180, false, true, 2, nil, nil, false)
-
-                    if IsControlJustPressed(0,38) then
-                        local model = GetEntityModel(vehicle)
-                        local modelName = GetDisplayNameFromVehicleModel(model):lower()
-                        
-                        local zRotation = side > 0 and 180 or 0
-
-                        local clipboardText = string.format(
-                            '["%s"] = { distance = 1.3, nozzleOffset = { forward = %.2f, right = %.2f, up = %.2f }, nozzleRotation = { x = 0, y = 0, z = %d } },',
-                            modelName,
-                            offset.forward, offset.right, offset.up,
-                            zRotation
-                        )
-
-                        SendNUIMessage({
-                            type = "copyToClipboard",
-                            text = clipboardText
-                        })
-
-                        exports['lc_utils']:notify("success", "Copied to clipboard: " .. clipboardText)
-                        exports['lc_utils']:notify("warning", "Make sure the vehicle spawn name is correct. You may need to manually fine-tune the offset and rotation.")
-                    end
-                end
-            end
-            Wait(2)
-            ::continue::
-        end
-    end)
 end
 
 -----------------------------------------------------------------------------------------------------------------------------------------
@@ -713,82 +634,7 @@ Citizen.CreateThread(function()
     if Config.JerryCan.enabled and Utils.Config.custom_scripts_compatibility.target == "disabled" then
         createJerryCanThread()
     end
-
-    if Config.DebugNozzleOffset then
-        createDebugNozzleOffsetThread()
-    end
 end)
-
--- Debug nozzle offset functions
-function GetVehiclePlayerIsLookingAt()
-    local playerPed = PlayerPedId()
-    local camCoords = GetGameplayCamCoord()
-    local camRot = GetGameplayCamRot(2)
-    local direction = RotationToDirection(camRot)
-    local maxDistance = 10.0
-
-    local destCoords = camCoords + direction * maxDistance
-    local rayHandle = StartShapeTestRay(camCoords.x, camCoords.y, camCoords.z, destCoords.x, destCoords.y, destCoords.z, 10, playerPed, 0)
-    local _, hit, endCoords, _, entityHit = GetShapeTestResult(rayHandle)
-
-    if hit == 1 and IsEntityAVehicle(entityHit) then
-        return entityHit
-    end
-    return nil
-end
-
-function GetLookAtHitCoords()
-    local playerPed = PlayerPedId()
-    local camCoords = GetGameplayCamCoord()
-    local camRot = GetGameplayCamRot(2)
-    local direction = RotationToDirection(camRot)
-
-    local endCoords = vec3(
-        camCoords.x + direction.x * 10.0,
-        camCoords.y + direction.y * 10.0,
-        camCoords.z + direction.z * 10.0
-    )
-
-    local rayHandle = StartShapeTestRay(camCoords.x, camCoords.y, camCoords.z, endCoords.x, endCoords.y, endCoords.z, -1, playerPed, 0)
-    local _, hit, hitCoords = GetShapeTestResult(rayHandle)
-    return hit, hitCoords
-end
-
-function RotationToDirection(rot)
-    local z = math.rad(rot.z)
-    local x = math.rad(rot.x)
-    local cosX = math.cos(x)
-
-    return vec3(
-        -math.sin(z) * cosX,
-        math.cos(z) * cosX,
-        math.sin(x)
-    )
-end
-
--- Gets the offset from 'petrolcap' to the point you're looking at
-function GetNozzleOffset(vehicle, hitCoords)
-    -- World position of the bone
-    local boneWorldPos = GetVehicleCapPos(vehicle)
-
-    -- Directional vector from bone to hit point
-    local direction = {
-        x = hitCoords.x - boneWorldPos.x,
-        y = hitCoords.y - boneWorldPos.y,
-        z = hitCoords.z - boneWorldPos.z
-    }
-
-    -- Convert direction vector to vehicle-local offset
-    local forwardVector, rightVector, upVector, _ = GetEntityMatrix(vehicle)
-
-    local offset = {
-        right = direction.x * rightVector.x + direction.y * rightVector.y + direction.z * rightVector.z,
-        forward = direction.x * forwardVector.x + direction.y * forwardVector.y + direction.z * forwardVector.z,
-        up = direction.x * upVector.x + direction.y * upVector.y + direction.z * upVector.z
-    }
-
-    return offset
-end
 
 if Config.EnableHUD then
     local function DrawAdvancedText(x,y ,w,h,sc, text, r,g,b,a,font,jus)

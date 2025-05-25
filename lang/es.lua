@@ -37,5 +37,9 @@ Lang['es'] = {
         ['balance_electric'] = "Carga eléctrica vendida (%s kWh)",
         ['refund_fuel'] = "Combustible reembolsado (%s litros)",
         ['refund_electric'] = "Carga eléctrica reembolsada (%s kWh)",
-    }
+    },
+    ['fuel_type'] = "Tipo de combustible:",
+    ['diesel'] = "Diésel",
+    ['electric'] = "Eléctrico",
+    ['gasoline'] = "Gasolina",
 }
