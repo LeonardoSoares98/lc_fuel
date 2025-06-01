@@ -35,5 +35,15 @@ Lang['en'] = {
         ['balance_jerry_can'] = "Gas can sold (%s Liters)",
         ['balance_fuel'] = "Fuel sold (%s Liters)",
         ['balance_electric'] = "Electric charge sold (%s kWh)",
-    }
+        ['refund_fuel'] = "Fuel refunded (%s Liters)",
+        ['refund_electric'] = "Electric charge refunded (%s kWh)",
+    },
+    ['fuel_types'] = {
+        ['type_title'] = "Fuel Type: %s",
+        ['electric'] = "Electric",
+        ['regular'] = "Regular",
+        ['plus'] = "Plus",
+        ['premium'] = "Premium",
+        ['diesel'] = "Diesel",
+    },
 }

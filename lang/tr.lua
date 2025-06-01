@@ -35,5 +35,15 @@ Lang['tr'] = {
         ['balance_jerry_can'] = "Yakıt bidonu satıldı (%s Litre)",
         ['balance_fuel'] = "Yakıt satıldı (%s Litre)",
         ['balance_electric'] = "Elektrik şarjı satıldı (%s kWh)",
-    }
+        ['refund_fuel'] = "Yakıt iade edildi (%s litre)",
+        ['refund_electric'] = "Elektrik şarjı iade edildi (%s kWh)",
+    },
+    ['fuel_types'] = {
+        ['type_title'] = "Yakıt Türü: %s",
+        ['electric'] = "Elektrikli",
+        ['regular'] = "Normal",
+        ['plus'] = "Plus",
+        ['premium'] = "Premium",
+        ['diesel'] = "Dizel",
+    },
 }

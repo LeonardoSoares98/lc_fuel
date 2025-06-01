@@ -128,12 +128,15 @@ AddEventHandler("lc_fuel:returnNozzle",function(remainingFuel, isElectric)
             return
         end
 
+        local gasStationId = getCurrentGasStationId(source)
+        local _, returnedAmount = returnStockToGasStation(gasStationId, amountToReturn, remainingFuel, fuelPurchased[source].selectedFuelType)
+
         if isElectric then
-            TriggerClientEvent("lc_fuel:Notify", source, "success", Utils.translate('returned_charge'):format(Utils.Math.round(remainingFuel, 1), amountToReturn))
+            TriggerClientEvent("lc_fuel:Notify", source, "success", Utils.translate('returned_charge'):format(Utils.Math.round(remainingFuel, 1), returnedAmount))
         else
-            TriggerClientEvent("lc_fuel:Notify", source, "success", Utils.translate('returned_fuel'):format(Utils.Math.round(remainingFuel, 1), amountToReturn))
+            TriggerClientEvent("lc_fuel:Notify", source, "success", Utils.translate('returned_fuel'):format(Utils.Math.round(remainingFuel, 1), returnedAmount))
         end
-        Utils.Framework.giveAccountMoney(source, amountToReturn, fuelPurchased[source].account)
+        Utils.Framework.giveAccountMoney(source, returnedAmount, fuelPurchased[source].account)
 
         fuelPurchased[source] = nil
     end)
@@ -271,6 +274,8 @@ function getStationData(gasStationId)
 end
 
 function removeStockFromStation(gasStationId, pricePaid, fuelAmount, fuelType, isJerryCan)
+    pricePaid = math.floor(pricePaid)
+
     if not isFuelTypeValid(fuelType) then
         print("Invalid fuel type: "..(fuelType or "nil"))
         return false
@@ -336,6 +341,72 @@ function removeStockFromStation(gasStationId, pricePaid, fuelAmount, fuelType, i
         end
     end
     return true
+end
+
+function returnStockToGasStation(gasStationId, priceRefunded, fuelAmount, fuelType)
+    priceRefunded = math.floor(priceRefunded)
+
+    if not isFuelTypeValid(fuelType) then
+        print("Invalid fuel type: "..(fuelType or "nil"))
+        return false, 0
+    end
+
+    -- If not owned
+    local stationData = getStationDataFromConfig()
+    if not gasStationId then
+        if stationData.stationStock[fuelType] >= fuelAmount then
+            -- If set in config to unowed gas stations have stock
+            return true, priceRefunded
+        else
+            return false, 0
+        end
+    end
+
+    local column = "stock_"..fuelType
+    if fuelType == "regular" then
+        column = "stock"
+    end
+
+    local sql = "SELECT "..column.." as stock, money, total_money_earned, gas_sold FROM gas_station_business WHERE gas_station_id = @gas_station_id";
+    local query = Utils.Database.fetchAll(sql, {['@gas_station_id'] = gasStationId})[1];
+
+    if not query then
+        if stationData.stationStock[fuelType] >= fuelAmount then
+            -- If set in config to unowed gas stations have stock
+            return true, priceRefunded
+        else
+            return false, 0
+        end
+    end
+
+    local actualRefund = 0
+
+    if isFuelTypeElectric(fuelType) then
+        actualRefund = math.min(priceRefunded, query.money)
+
+        local newMoney = math.max(query.money - actualRefund, 0)
+        local newTotalEarned = math.max(query.total_money_earned - actualRefund, 0)
+
+        local sql = "UPDATE `gas_station_business` SET money = @money, total_money_earned = @total WHERE gas_station_id = @gas_station_id";
+        Utils.Database.execute(sql, { ['@gas_station_id'] = gasStationId, ['@money'] = newMoney, ['@total'] = newTotalEarned })
+
+        local sql = "INSERT INTO `gas_station_balance` (gas_station_id,income,title,amount,date) VALUES (@gas_station_id,@income,@title,@amount,@date)";
+        Utils.Database.execute(sql, { ['@gas_station_id'] = gasStationId, ['@income'] = 1, ['@title'] = Utils.translate('owned_gas_stations.refund_electric'):format(fuelAmount), ['@amount'] = actualRefund, ['@date'] = os.time() })
+    else
+        actualRefund = math.min(priceRefunded, query.money)
+
+        local newStock = query.stock + fuelAmount
+        local newMoney = math.max(query.money - actualRefund, 0)
+        local newTotalEarned = math.max(query.total_money_earned - actualRefund, 0)
+        local newGasSold = math.max((query.gas_sold or 0) - fuelAmount, 0)
+
+        local sql = "UPDATE `gas_station_business` SET "..column.." = @stock, money = @money, total_money_earned = @total, gas_sold = @sold WHERE gas_station_id = @gas_station_id";
+        Utils.Database.execute(sql, { ['@gas_station_id'] = gasStationId, ['@stock'] = newStock, ['@money'] = newMoney, ['@total'] = newTotalEarned, ['@sold'] = newGasSold })
+
+        local sql = "INSERT INTO `gas_station_balance` (gas_station_id,income,title,amount,date) VALUES (@gas_station_id,@income,@title,@amount,@date)";
+        Utils.Database.execute(sql, { ['@gas_station_id'] = gasStationId, ['@income'] = 1, ['@title'] = Utils.translate('owned_gas_stations.refund_fuel'):format(fuelAmount), ['@amount'] = actualRefund, ['@date'] = os.time() })
+    end
+    return true, actualRefund
 end
 
 -----------------------------------------------------------------------------------------------------------------------------------------

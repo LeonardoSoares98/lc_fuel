@@ -35,5 +35,15 @@ Lang['es'] = {
         ['balance_jerry_can'] = "Bidón de gasolina vendido (%s Litros)",
         ['balance_fuel'] = "Combustible vendido (%s Litros)",
         ['balance_electric'] = "Carga eléctrica vendida (%s kWh)",
-    }
+        ['refund_fuel'] = "Combustible reembolsado (%s litros)",
+        ['refund_electric'] = "Carga eléctrica reembolsada (%s kWh)",
+    },
+    ['fuel_types'] = {
+        ['type_title'] = "Tipo de combustible: %s",
+        ['electric'] = "Eléctrico",
+        ['regular'] = "Sin plomo",
+        ['plus'] = "Plus",
+        ['premium'] = "Premium",
+        ['diesel'] = "Diésel",
+    },
 }

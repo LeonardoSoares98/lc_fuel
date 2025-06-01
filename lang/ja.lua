@@ -35,5 +35,15 @@ Lang['ja'] = {
         ['balance_jerry_can'] = "ガソリン缶販売 (%s L)",
         ['balance_fuel'] = "燃料販売 (%s L)",
         ['balance_electric'] = "電気充電販売 (%s kWh)",
-    }
+        ['refund_fuel'] = "燃料が返金されました（%sリットル）",
+        ['refund_electric'] = "電気充電が返金されました（%s kWh）",
+    },
+    ['fuel_types'] = {
+        ['type_title'] = "燃料の種類: %s",
+        ['electric'] = "電気",
+        ['regular'] = "レギュラー",
+        ['plus'] = "プラス",
+        ['premium'] = "プレミアム",
+        ['diesel'] = "ディーゼル",
+    },
 }

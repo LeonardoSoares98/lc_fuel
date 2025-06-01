@@ -21,6 +21,14 @@ window.addEventListener("message", async function(event) {
         await Utils.loadLanguageModules(item.utils);
         Utils.post("setNuiVariablesLoaded", null, "setNuiVariablesLoaded");
     }
+    if (item.type === "copyToClipboard") {
+        const el = document.createElement("textarea");
+        el.value = item.text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand("copy");
+        document.body.removeChild(el);
+    }
     if (item.openMainUI) {
         if (currentPumpData.isElectric) {
             $("#electric-time-to-recharge").html(`${Utils.translate("electricInterface.chargerAmount.timeToRechargeText")} <span id="electric-time-to-recharge-value"></span>`);
@@ -145,11 +153,13 @@ window.addEventListener("message", async function(event) {
         createFuelConsumptionChartObject();
         openFuelConsumptionChart();
         setFuelConsumptionChartPosition(item.position);
+        updateFuelConsumptionChart({ fuel: null, speed: null, consumption: null });
     }
     if (item.updateFuelConsumptionChart) {
         updateFuelConsumptionChart(item.fuelConsumptionData);
     }
     if (item.hideFuelConsumptionChart) {
+        updateFuelConsumptionChart({ fuel: null, speed: null, consumption: null });
         $("#chart-dialog").fadeOut();
         // fuelChart.destroy();
         // speedChart.destroy();
@@ -301,7 +311,7 @@ function chargerTypeContinue() {
 function chargerAmountContinue() {
     let $input = $("#electric-charger-amount-input");
     let currentValue = parseInt($input.val()) || 0;
-    let newWidthPercentage = currentPumpData.vehicleFuel + currentValue;
+    let newWidthPercentage = ((currentPumpData.vehicleFuel / currentPumpData.vehicleTankSize) * 100) + ((currentValue / currentPumpData.vehicleTankSize) * 100);
 
     if (currentValue <= 0 || newWidthPercentage > 100) {
         return;
