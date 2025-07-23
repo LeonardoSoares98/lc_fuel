@@ -470,7 +470,6 @@ Config.Electric = {
         { prop = "prop_electric_01", location = vector4(2561.24, 357.3, 107.62, 267.65), ropeLength = 7.5 },
         { prop = "prop_electric_01", location = vector4(-1819.22, 798.51, 137.16, 316.13), ropeLength = 7.5 },
         { prop = "prop_electric_01", location = vector4(-341.63, -1459.39, 29.76, 272.73), ropeLength = 7.5 },
-        { prop = "prop_electric_01", location = vector4(-3099.4470, 1431.6660, 19.6253, 326.2006), ropeLength = 7.5 },
     },
     chargersProps = {					-- List of the props and their offsets to fuel rope
         { prop = "prop_electric_01", ropeOffset = { forward = 0.0, right = 0.25, up = 0.3 } },
