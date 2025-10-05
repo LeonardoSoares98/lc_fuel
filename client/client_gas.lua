@@ -128,6 +128,17 @@ AddEventHandler('qb-weapons:client:SetCurrentWeapon', function(data, bool)
     end
 end)
 
+AddEventHandler('ox_inventory:currentWeapon', function(weapon)
+    if weapon then
+        if weapon.metadata then
+            weapon.info = weapon.metadata
+        end
+        currentWeaponData = weapon
+    else
+        currentWeaponData = {}
+    end
+end)
+
 -- Get jerry can ammo by metadata
 function getJerryCanAmmo()
     if currentWeaponData and currentWeaponData.info and currentWeaponData.info.ammo then
