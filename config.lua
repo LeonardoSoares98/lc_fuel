@@ -61,7 +61,7 @@ Config.DefaultValues = {
 }
 
 -- Config for linking the gas pumps to player owned gas stations
--- ATTENTION: Only if you own lc_gas_stations (https://store.lixeirocharmoso.com/package/4942445)
+-- ATTENTION: Only if you own lc_gas_stations (https://store.lixeirocharmoso.com/package/4942438)
 Config.PlayerOwnedGasStations = {
     enabled = false,			-- Enable/disable retrieve fuel price and stock from player owned gas stations
     gasStations = {				-- This list is the vector3 + radius of center of the gas pumps area, so the script can know which gas pump is from which gas station
