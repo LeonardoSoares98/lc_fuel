@@ -192,13 +192,18 @@ function executeRefuelAction(isFromJerryCan, closestVehicle, closestCapPos, clos
                             fuelTypePurchased = fuelTypePurchased
                         })
                         if Config.Debug then print("executeRefuelAction:remainingFuelToRefuel", remainingFuelToRefuel) end
+
+                        -- Update the jerry can ammo every tick
+                        if isFromJerryCan then
+                            updateWeaponAmmo(remainingFuelToRefuel - (litersDeductedEachTick * 3)) -- "-litersDeductedEachTick" to deduct the next 3 ticks and avoid user suddently holstering the gas can
+                        end
+
                         Wait(refuelTick)
                     end
                     if isFromJerryCan then
-                        -- Update the jerry can ammo
-                        SetPedAmmo(ped, JERRY_CAN_HASH, remainingFuelToRefuel)
-                        updateWeaponAmmo(remainingFuelToRefuel)
+                        -- Clear the vehicle attached to the can
                         vehicleAttachedToNozzle = nil
+                        updateWeaponAmmo(remainingFuelToRefuel) -- Set the ammo again if the user is still holstering it
                     end
                     if isElectric then
                         exports['lc_utils']:notify("success", Utils.translate("vehicle_recharged"):format(Utils.Math.round(getVehicleDisplayFuelAmount(currentFuel, vehicleTankSize) - getVehicleDisplayFuelAmount(startingFuel, vehicleTankSize), 1)))
