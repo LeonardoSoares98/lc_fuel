@@ -23,6 +23,7 @@ Lang['es'] = {
     ['returned_charge'] = "Has devuelto %skWh de carga y recibido $%s",
     ['jerry_can_paid'] = "Pagaste $%s por este bidón de gasolina",
     ['too_far_away'] = "Estás demasiado lejos del surtidor",
+    ['turn_off_engine'] = "Apaga el motor antes de repostar",
     ['vehicle_refueled'] = "Repostaste %sL en el vehículo",
     ['vehicle_recharged'] = "Recargaste %skWh en el vehículo",
     ['vehicle_tank_full'] = "El tanque del vehículo está lleno",

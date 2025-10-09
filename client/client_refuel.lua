@@ -134,6 +134,12 @@ function executeRefuelAction(isFromJerryCan, closestVehicle, closestCapPos, clos
         animationDuration = -1 -- (infinite) Do not allow the player walk during refuel from jerry can
     end
 
+    if IsVehicleEngineOn(closestVehicle) then
+        exports['lc_utils']:notify("error", Utils.translate("turn_off_engine"))
+        stopRefuelAction()
+        return
+    end
+
     -- Do not allow user mix electric and petrol fuel/vehicles
     if (isElectric and Config.Electric.vehiclesListHash[closestVehicleHash]) or (not isElectric and not Config.Electric.vehiclesListHash[closestVehicleHash]) then
         if not isRefuelling and not vehicleAttachedToNozzle then
@@ -164,6 +170,12 @@ function executeRefuelAction(isFromJerryCan, closestVehicle, closestCapPos, clos
                     local currentFuel = startingFuel
                     -- Loop keep happening while the player has not canceled, while the fuelNozzle exists and while the ped still has jerry can in hands
                     while isRefuelling and (DoesEntityExist(fuelNozzle) or (isFromJerryCan and GetSelectedPedWeapon(ped) == JERRY_CAN_HASH)) do
+                        -- Stop refuel if the vehicle engine is on
+                        if IsVehicleEngineOn(vehicleToRefuel) then
+                            exports['lc_utils']:notify("error", Utils.translate("turn_off_engine"))
+                            stopRefuelAction()
+                            break
+                        end
                         currentFuel = GetFuel(vehicleToRefuel)
                         local percentageOfFuelToAdd = calculateFuelToAddPercentage(vehicleTankSize) -- Add 0.5L each tick, but the % is proportional to the vehicle tank
                         if currentFuel + percentageOfFuelToAdd > 100 then
@@ -414,6 +426,7 @@ function stopRefuelAction()
 end
 
 function attachNozzleToVehicle(closestVehicle, customVehicleParameters)
+    requestNozzleOwnership()
     DetachEntity(fuelNozzle, true, true)
 
     -- Find the appropriate bone for the fuel cap
@@ -454,6 +467,7 @@ function attachNozzleToVehicle(closestVehicle, customVehicleParameters)
 end
 
 function attachNozzleToPed()
+    requestNozzleOwnership()
     DetachEntity(fuelNozzle, true, true)
 
     local ped = PlayerPedId()

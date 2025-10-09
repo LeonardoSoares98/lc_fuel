@@ -23,6 +23,7 @@ Lang['tr'] = {
     ['returned_charge'] = "%skWh şarj iade ettiniz ve $%s geri aldınız",
     ['jerry_can_paid'] = "Bu bidon için $%s ödendi",
     ['too_far_away'] = "Pompadan çok uzaktasınız",
+    ['turn_off_engine'] = "Yakıt almadan önce motoru kapatın",
     ['vehicle_refueled'] = "Araca %sL yakıt dolduruldu",
     ['vehicle_recharged'] = "Araca %skWh şarj yapıldı",
     ['vehicle_tank_full'] = "Araç deposu dolu",

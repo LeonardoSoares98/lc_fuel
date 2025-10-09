@@ -872,7 +872,21 @@ function deleteRopeAndNozzleProp()
         DeleteRope(fuelRope)
     end
     if DoesEntityExist(fuelNozzle) then
+        requestNozzleOwnership()
         DeleteEntity(fuelNozzle)
+        DeleteObject(fuelNozzle)
+    end
+end
+
+function requestNozzleOwnership()
+    NetworkRequestControlOfEntity(fuelNozzle)
+    local start = GetGameTimer()
+    while not NetworkHasControlOfEntity(fuelNozzle) and GetGameTimer() - start < 2000 do
+        Wait(0)
+        NetworkRequestControlOfEntity(fuelNozzle)
+    end
+    if not NetworkHasControlOfEntity(fuelNozzle) then
+        print("Failed to gain control of fuel nozzle prop")
     end
 end
 

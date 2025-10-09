@@ -23,6 +23,7 @@ Lang['zh-cn'] = {
     ['returned_charge'] = "你已归还%skWh电量，并收到$%s",
     ['jerry_can_paid'] = "本次便携油桶购买消费 $%s",
     ['too_far_away'] = "您与加油设备间距超出操作范围!",
+    ['turn_off_engine'] = "加油前请关闭发动机",
     ['vehicle_refueled'] = "车辆成功加注燃油 %s 升(L)",
     ['vehicle_recharged'] = "车辆成功充入电能 %s 千瓦时(kWh)",
     ['vehicle_tank_full'] = "车辆油箱已达最大容量",

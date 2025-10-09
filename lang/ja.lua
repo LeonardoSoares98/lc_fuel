@@ -23,6 +23,7 @@ Lang['ja'] = {
     ['returned_charge'] = "電力を%skWh返却し、$%sを受け取りました",
     ['jerry_can_paid'] = "このガソリン缶に$%s支払いました",
     ['too_far_away'] = "ポンプから離れすぎています",
+    ['turn_off_engine'] = "給油する前にエンジンを停止してください",
     ['vehicle_refueled'] = "車両に%sLの燃料を補給しました",
     ['vehicle_recharged'] = "車両に%s kWhの充電を行いました",
     ['vehicle_tank_full'] = "車両のタンクが満タンです",

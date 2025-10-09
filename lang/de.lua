@@ -23,6 +23,7 @@ Lang['de'] = {
     ['returned_charge'] = "Du hast %skWh Ladung zurückgegeben und $%s zurückerhalten",
     ['jerry_can_paid'] = "$%s bezahlt für den Kanister",
     ['too_far_away'] = "Sie sind zu weit von der Zapfseule entfernt",
+    ['turn_off_engine'] = "Schalten Sie den Motor aus, bevor Sie tanken",
     ['vehicle_refueled'] = "Sie haben %sL ins Fahrzeug getankt",
     ['vehicle_recharged'] = "Sie haben %skWh im Fahrzeug aufgeladen",
     ['vehicle_tank_full'] = "Auto ist voll getankt",

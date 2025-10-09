@@ -23,6 +23,7 @@ Lang['fr'] = {
     ['returned_charge'] = "Vous avez rendu %skWh de charge et reçu $%s",
     ['jerry_can_paid'] = "Vous avez payé $%s pour ce bidon d'essence",
     ['too_far_away'] = "Vous êtes trop loin de la pompe",
+    ['turn_off_engine'] = "Coupez le moteur avant de faire le plein",
     ['vehicle_refueled'] = "Vous avez mis %sL dans le véhicule",
     ['vehicle_recharged'] = "Vous avez rechargé %skWh dans le véhicule",
     ['vehicle_tank_full'] = "Le réservoir du véhicule est plein",

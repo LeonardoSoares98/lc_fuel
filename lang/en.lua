@@ -23,6 +23,7 @@ Lang['en'] = {
     ['returned_charge'] = "You've returned %skWh of fuel and received back $%s",
     ['jerry_can_paid'] = "Paid $%s for this jerry can",
     ['too_far_away'] = "You are too far from the pump",
+    ['turn_off_engine'] = "Turn off the engine before refuelling",
     ['vehicle_refueled'] = "You refueled %sL in the vehicle",
     ['vehicle_recharged'] = "You recharged %skWh in the vehicle",
     ['vehicle_tank_full'] = "Vehicle tank is full",
