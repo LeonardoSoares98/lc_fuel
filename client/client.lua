@@ -592,6 +592,28 @@ function GetClosestPump(coords, isElectric)
     return nil, nil
 end
 
+function GetPumpPropNameFromEntity(entity, isElectric)
+    if not entity or entity == 0 then
+        return nil
+    end
+
+    local modelHash = GetEntityModel(entity)
+    local map = isElectric and Config.Electric.chargersPropsHash or Config.GasPumpPropsHash
+    if map and map[modelHash] then
+        return map[modelHash]
+    end
+
+    -- Fallback to a linear scan in case hashes were not initialized.
+    local list = isElectric and Config.Electric.chargersProps or Config.GasPumpProps
+    for i = 1, #list do
+        if modelHash == joaat(list[i].prop) then
+            return list[i].prop
+        end
+    end
+
+    return nil
+end
+
 function createBlips()
     if Config.Blips.onlyShowNearestBlip then
         Citizen.CreateThread(function()
@@ -660,6 +682,16 @@ function convertConfigVehiclesDisplayNameToHash()
         Config.CustomVehicleParametersHash[joaat(key)] = value
     end
     Config.CustomVehicleParametersHash.default = Config.CustomVehicleParameters.default -- Adds back the default
+
+    Config.GasPumpPropsHash = {}
+    for _, value in pairs(Config.GasPumpProps) do
+        Config.GasPumpPropsHash[joaat(value.prop)] = value.prop
+    end
+
+    Config.Electric.chargersPropsHash = {}
+    for _, value in pairs(Config.Electric.chargersProps) do
+        Config.Electric.chargersPropsHash[joaat(value.prop)] = value.prop
+    end
 end
 
 RegisterNetEvent('lc_fuel:Notify')
