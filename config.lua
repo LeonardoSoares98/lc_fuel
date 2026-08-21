@@ -7,6 +7,25 @@ Config.RefuelTick = 300                 -- Time in ms to refuel 0.5L of fuel in 
 Config.FuelTypeCommand = "fuel_type"    -- Command to show the fuel type of the vehicle
 Config.SaveAllVehicleFuelTypes = true   -- true: Saves fuel type in database for all vehicles. false: Saves fuel type in database only for player-owned vehicles, ignoring NPC or other vehicles. The players can still change their fuel types, but it will not persist through server restarts.
 
+-- ============================================================================
+-- Standalone Mode (vMenu / no framework)
+-- ============================================================================
+-- Toggle this ON if your server does NOT use a framework (QB/ESX/etc).
+-- When enabled, lc_fuel will:
+-- - Skip ALL database usage (fuel types, station stock, owned stations).
+-- - Make fuel FREE (no money checks/deductions), but still shows prices in UI.
+-- - Use UNLIMITED stock (never runs out).
+-- - Store fuel type in memory only (resets on restart).
+-- - Disable jerry can purchase (framework inventory required).
+-- - Show $0 cash/bank in the UI to avoid confusion.
+--
+-- Quick start:
+-- 1) Set this to true.
+-- 2) Restart lc_fuel.
+Config.StandaloneMode = false
+Config.EnableSetFuelCommand = false    -- If true, enables /setfuel 0-100 for the current vehicle
+Config.SetFuelCommand = "setfuel"      -- Command name for setting fuel
+
 Config.NozzleProps = {			-- Props used in the script
     gas = "prop_cs_fuel_nozle",
     electric = "prop_eletricpistol",
