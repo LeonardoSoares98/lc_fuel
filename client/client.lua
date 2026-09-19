@@ -567,9 +567,17 @@ function IsVehicleDiesel(vehicle)
     return false
 end
 
+local gameBuild = GetGameBuildNumber()
+
 function IsVehicleElectric(vehicle)
     if vehicle and vehicle ~= 0 then
         local vehicleHash = GetEntityModel(vehicle)
+        
+        -- Native check for game builds 3258+
+        if gameBuild >= 3258 and GetIsVehicleElectric(vehicleHash) == 1 then
+            return true
+        end
+
         -- Check if the vehicle is in the diesel list
         if Config.Electric.vehiclesListHash[vehicleHash] then
             return true
