@@ -87,8 +87,10 @@ function HandleFuelConsumption(vehicle, fuelType)
     -- Get the vehicle's actual tank size in liters
     local tankSize = getVehicleTankSize(vehicle)
 
-    -- Base consumption from config and RPM
-    currentConsumption = Config.FuelUsage[Utils.Math.round(GetVehicleCurrentRpm(vehicle), 1)] * (Config.FuelConsumptionPerClass[GetVehicleClass(vehicle)] or 1.0) * (Config.FuelConsumptionPerFuelType[fuelType] or 1.0) / 10
+    -- Base consumption from config and RPM. The RPM is clamped to 0.0-1.0, the range of Config.FuelUsage: a value outside it
+    -- (seen once) made the lookup nil and the error stopped this thread, so fuel was no longer consumed
+    local rpm = math.min(1.0, math.max(0.0, GetVehicleCurrentRpm(vehicle)))
+    currentConsumption = Config.FuelUsage[Utils.Math.round(rpm, 1)] * (Config.FuelConsumptionPerClass[GetVehicleClass(vehicle)] or 1.0) * (Config.FuelConsumptionPerFuelType[fuelType] or 1.0) / 10
 
     -- Scale consumption according to tank size.
     -- A smaller tank will lose percentage faster; a bigger tank slower.
