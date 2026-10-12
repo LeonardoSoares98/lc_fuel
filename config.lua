@@ -488,6 +488,7 @@ Config.Electric = {
             stock = true
         }
     },
+    -- On game builds >= 3258, electric vehicles are automatically detected; this list (Config.Electric.vehiclesListHash) is still used as a fallback.
     vehiclesList = {					-- Electric vehicles list
         "voltic",
         "voltic2",
