@@ -77,6 +77,11 @@ window.addEventListener("message", async function(event) {
             $(".electric-charger-type-container").css("display", "");
             $(".electric-charger-amount-container").css("display", "none");
             $(".electric-charger-payment-container").css("display", "none");
+            if (currentPumpData.isStandalone) {
+                $(".electric-charger-payment-container .electric-charger-buttons-container").css("display", "none");
+            } else {
+                $(".electric-charger-payment-container .electric-charger-buttons-container").css("display", "");
+            }
             $("#electric-charger-container").fadeIn(200);
         } else {
             if (currentPumpData.pumpModel == "prop_gas_pump_1a" || currentPumpData.pumpModel == "prop_gas_pump_1b" || currentPumpData.pumpModel == "prop_gas_pump_1c" || currentPumpData.pumpModel == "prop_gas_pump_1d") {
@@ -98,21 +103,34 @@ window.addEventListener("message", async function(event) {
             $(".confirm-button").text(Utils.translate("pumpInterface.confirm"));
 
             $("#confirm-refuel-payment-modal-title").text(Utils.translate("confirmRefuelModal.title"));
-            $("#confirm-refuel-payment-modal-pay-bank").text(Utils.translate("confirmRefuelModal.paymentBank"));
-            $("#confirm-refuel-payment-modal-pay-cash").text(Utils.translate("confirmRefuelModal.paymentCash"));
-
             $("#confirm-jerry-can-payment-modal-title").text(Utils.translate("confirmBuyJerryCanModal.title"));
             $("#confirm-jerry-can-payment-modal-desc").text(Utils.currencyFormat(currentPumpData.jerryCan.price, 2));
-            $("#confirm-jerry-can-payment-modal-pay-bank").text(Utils.translate("confirmBuyJerryCanModal.paymentBank"));
-            $("#confirm-jerry-can-payment-modal-pay-cash").text(Utils.translate("confirmBuyJerryCanModal.paymentCash"));
+
+            if (currentPumpData.isStandalone) {
+                $("#confirm-refuel-payment-modal-pay-bank").css("display", "none");
+                $("#confirm-refuel-payment-modal-pay-cash").text(Utils.translate("confirmation_modal_confirm_button"));
+                $("#confirm-jerry-can-payment-modal-pay-bank").css("display", "none");
+                $("#confirm-jerry-can-payment-modal-pay-cash").text(Utils.translate("confirmation_modal_confirm_button"));
+            } else {
+                $("#confirm-refuel-payment-modal-pay-bank").css("display", "");
+                $("#confirm-refuel-payment-modal-pay-cash").css("display", "");
+                $("#confirm-refuel-payment-modal-pay-bank").text(Utils.translate("confirmRefuelModal.paymentBank"));
+                $("#confirm-refuel-payment-modal-pay-cash").text(Utils.translate("confirmRefuelModal.paymentCash"));
+                $("#confirm-jerry-can-payment-modal-pay-bank").css("display", "");
+                $("#confirm-jerry-can-payment-modal-pay-cash").css("display", "");
+                $("#confirm-jerry-can-payment-modal-pay-bank").text(Utils.translate("confirmBuyJerryCanModal.paymentBank"));
+                $("#confirm-jerry-can-payment-modal-pay-cash").text(Utils.translate("confirmBuyJerryCanModal.paymentCash"));
+            }
 
             $("#confirm-fuel-type-modal-title").text(Utils.translate("confirmFuelChangeModal.title"));
             $("#confirm-fuel-type-modal-desc").text(Utils.translate("confirmFuelChangeModal.description"));
             $("#confirm-fuel-type-modal-confirm").text(Utils.translate("confirmation_modal_confirm_button"));
             $("#confirm-fuel-type-modal-cancel").text(Utils.translate("confirmation_modal_cancel_button"));
 
-            if (!currentPumpData.jerryCan.enabled) {
+            if (!currentPumpData.jerryCan.enabled || currentPumpData.isStandalone) {
                 $(".gas-pump-interactive-button").css("display", "none");
+            } else {
+                $(".gas-pump-interactive-button").css("display", "");
             }
 
             updateFuelAmountDisplay(true);
@@ -225,6 +243,9 @@ function changeVehicleFuelType() {
 
 // Confirm the buy jerry can action
 function openBuyJerryCanModal() {
+    if (currentPumpData && currentPumpData.isStandalone) {
+        return;
+    }
     closeModal();
     $("#confirm-jerry-can-payment-modal").fadeIn();
 }

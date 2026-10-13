@@ -36,12 +36,29 @@ function createGasTargetsThread()
     Utils.Target.createTargetForModel(pumpModels,returnNozzle,Utils.translate('target.return_nozzle'),"fas fa-gas-pump","#a42100",nil,nil,canReturnNozzleTargetCallback)
 end
 
-function openFuelUICallback()
+function openFuelUICallback(entity)
+    local pump = nil
+
+    if type(entity) == "number" then
+        pump = entity
+    elseif type(entity) == "table" then
+        pump = entity.entity or entity[1]
+    end
+
+    if pump and pump ~= 0 then
+        local pumpModel = GetPumpPropNameFromEntity(pump, false)
+        if pumpModel then
+            clientOpenUI(pump, pumpModel, false)
+            return
+        end
+    end
+
+    -- Backwards-compat fallback for target systems that don't pass entity
     local ped = PlayerPedId()
     local playerCoords = GetEntityCoords(ped)
-    local pump, pumpModel = GetClosestPump(playerCoords, false)
-    if pump then
-        clientOpenUI(pump, pumpModel, false)
+    local closestPump, pumpModel = GetClosestPump(playerCoords, false)
+    if closestPump then
+        clientOpenUI(closestPump, pumpModel, false)
     else
         exports['lc_utils']:notify("error", Utils.translate("pump_not_found"))
     end

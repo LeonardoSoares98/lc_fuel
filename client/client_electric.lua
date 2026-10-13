@@ -74,12 +74,29 @@ function createElectricTargetsThread()
     Utils.Target.createTargetForModel(pumpModels,returnNozzle,Utils.translate('target.return_nozzle'),"fas fa-plug","#a42100",nil,nil,canReturnNozzleTargetCallback)
 end
 
-function openElectricUICallback()
+function openElectricUICallback(entity)
+    local pump = nil
+
+    if type(entity) == "number" then
+        pump = entity
+    elseif type(entity) == "table" then
+        pump = entity.entity or entity[1]
+    end
+
+    if pump and pump ~= 0 then
+        local pumpModel = GetPumpPropNameFromEntity(pump, true)
+        if pumpModel then
+            clientOpenUI(pump, pumpModel, true)
+            return
+        end
+    end
+
+    -- Backwards-compat fallback for target systems that don't pass entity
     local ped = PlayerPedId()
     local playerCoords = GetEntityCoords(ped)
-    local pump, pumpModel = GetClosestPump(playerCoords, true)
-    if pump then
-        clientOpenUI(pump, pumpModel, true)
+    local closestPump, pumpModel = GetClosestPump(playerCoords, true)
+    if closestPump then
+        clientOpenUI(closestPump, pumpModel, true)
     else
         exports['lc_utils']:notify("error", Utils.translate("pump_not_found"))
     end

@@ -49,6 +49,13 @@ local fuelPurchased = {}
 -- Script functions
 -----------------------------------------------------------------------------------------------------------------------------------------
 
+local function isStandaloneFree()
+    if Config.StandaloneMode ~= nil then
+        return Config.StandaloneMode == true
+    end
+    return Config.StandaloneFuelType == true
+end
+
 RegisterServerEvent("lc_fuel:serverOpenUI")
 AddEventHandler("lc_fuel:serverOpenUI",function(isElectric, pumpModel, vehicleFuel, vehicleTankSize, vehiclePlate)
     local source = source
@@ -74,9 +81,11 @@ AddEventHandler("lc_fuel:confirmRefuel",function(data)
 
         local discount = getPlayerDiscountAmount(source)
         local finalPrice = initialPrice * (1 - (discount / 100))
-        if Utils.Framework.getPlayerAccountMoney(source, Config.Accounts[data.paymentMethod]) < finalPrice then
-            TriggerClientEvent("lc_fuel:Notify", source, "error", Utils.translate('not_enough_money'):format(Utils.numberFormat(finalPrice)))
-            return
+        if not isStandaloneFree() then
+            if Utils.Framework.getPlayerAccountMoney(source, Config.Accounts[data.paymentMethod]) < finalPrice then
+                TriggerClientEvent("lc_fuel:Notify", source, "error", Utils.translate('not_enough_money'):format(Utils.numberFormat(finalPrice)))
+                return
+            end
         end
 
         if not removeStockFromStation(gasStationId, finalPrice, data.fuelAmount, data.selectedFuelType, false) then
@@ -84,11 +93,13 @@ AddEventHandler("lc_fuel:confirmRefuel",function(data)
             return
         end
 
-        Utils.Framework.tryRemoveAccountMoney(source, finalPrice, Config.Accounts[data.paymentMethod])
+        if not isStandaloneFree() then
+            Utils.Framework.tryRemoveAccountMoney(source, finalPrice, Config.Accounts[data.paymentMethod])
+        end
 
         fuelPurchased[source] = {
             finalPrice = finalPrice,
-            account = Config.Accounts[data.paymentMethod],
+            accountKey = data.paymentMethod,
             selectedFuelType = data.selectedFuelType,
             fuelAmount = data.fuelAmount,
             pricePerLiter = pricePerLiter,
@@ -120,6 +131,9 @@ AddEventHandler("lc_fuel:returnNozzle",function(remainingFuel, isElectric)
 
         local discount = getPlayerDiscountAmount(source)
         local amountToReturn = math.floor(remainingFuel * (fuelPurchased[source].pricePerLiter * (1 - (discount / 100))))
+        if isStandaloneFree() then
+            amountToReturn = 0
+        end
 
         if amountToReturn > fuelPurchased[source].finalPrice or remainingFuel > fuelPurchased[source].fuelAmount then
             print("User "..user_id.." initially purchased "..fuelPurchased[source].fuelAmount.."L of fuel but now is returning "..remainingFuel.."L. Is this user trying to glitch something?")
@@ -136,7 +150,9 @@ AddEventHandler("lc_fuel:returnNozzle",function(remainingFuel, isElectric)
         else
             TriggerClientEvent("lc_fuel:Notify", source, "success", Utils.translate('returned_fuel'):format(Utils.Math.round(remainingFuel, 1), returnedAmount))
         end
-        Utils.Framework.giveAccountMoney(source, returnedAmount, fuelPurchased[source].account)
+        if not isStandaloneFree() then
+            Utils.Framework.giveAccountMoney(source, returnedAmount, Config.Accounts[fuelPurchased[source].accountKey])
+        end
 
         fuelPurchased[source] = nil
     end)
@@ -147,6 +163,10 @@ AddEventHandler("lc_fuel:confirmJerryCanPurchase",function(data)
     if not Config.JerryCan.enabled then return end
     local source = source
     Wrapper(source,function(user_id)
+        if isStandaloneFree() then
+            TriggerClientEvent("lc_fuel:Notify", source, "error", "Jerry cans are disabled in standalone mode.")
+            return
+        end
         if not isPaymentMethodValid(data.paymentMethod) then
             TriggerClientEvent("lc_fuel:Notify", source, "error", Utils.translate('invalid_value'))
             return
@@ -171,16 +191,20 @@ AddEventHandler("lc_fuel:confirmJerryCanPurchase",function(data)
             return
         end
 
-        if Utils.Framework.getPlayerAccountMoney(source, Config.Accounts[data.paymentMethod]) < Config.JerryCan.price then
-            TriggerClientEvent("lc_fuel:Notify", source, "error", Utils.translate('not_enough_money'):format(Config.JerryCan.price))
-            return
+        if not isStandaloneFree() then
+            if Utils.Framework.getPlayerAccountMoney(source, Config.Accounts[data.paymentMethod]) < Config.JerryCan.price then
+                TriggerClientEvent("lc_fuel:Notify", source, "error", Utils.translate('not_enough_money'):format(Config.JerryCan.price))
+                return
+            end
         end
 
         if not removeStockFromStation(gasStationId, Config.JerryCan.price, Config.JerryCan.requiredStock, fuelType, true) then
             TriggerClientEvent("lc_fuel:Notify", source, "error", Utils.translate('not_enough_stock'))
             return
         end
-        Utils.Framework.tryRemoveAccountMoney(source, Config.JerryCan.price, Config.Accounts[data.paymentMethod])
+        if not isStandaloneFree() then
+            Utils.Framework.tryRemoveAccountMoney(source, Config.JerryCan.price, Config.Accounts[data.paymentMethod])
+        end
 
         -- Gives the jerry can to the player
         if Config.JerryCan.giveAsWeapon then
@@ -204,9 +228,10 @@ function serverOpenUI(source, isElectric, pumpModel, gasStationId, vehicleFuel, 
         currentFuelType = getVehicleFuelType(vehiclePlate),
         vehicleFuel = vehicleFuel or 0,
         vehicleTankSize = vehicleTankSize or 100,
-        cashBalance = Utils.Framework.getPlayerAccountMoney(source, Config.Accounts.account1),
-        bankBalance = Utils.Framework.getPlayerAccountMoney(source, Config.Accounts.account2),
+        cashBalance = isStandaloneFree() and 0 or Utils.Framework.getPlayerAccountMoney(source, Config.Accounts.account1),
+        bankBalance = isStandaloneFree() and 0 or Utils.Framework.getPlayerAccountMoney(source, Config.Accounts.account2),
         jerryCan = Config.JerryCan,
+        isStandalone = isStandaloneFree(),
         isElectric = isElectric,
         electric = Config.Electric,
         pumpModel = pumpModel,
@@ -225,6 +250,9 @@ end
 -----------------------------------------------------------------------------------------------------------------------------------------
 
 function getCurrentGasStationId(source)
+    if isStandaloneFree() then
+        return nil
+    end
     if not Config.PlayerOwnedGasStations.enabled then return nil end
     local playerCoords = GetEntityCoords(GetPlayerPed(source))
     for k,v in pairs(Config.PlayerOwnedGasStations.gasStations) do
@@ -236,6 +264,9 @@ function getCurrentGasStationId(source)
 end
 
 function getStationData(gasStationId)
+    if isStandaloneFree() then
+        return getStationDataFromConfig()
+    end
     local stationData = getStationDataFromConfig()
     if not gasStationId then
         return stationData
@@ -279,6 +310,10 @@ function removeStockFromStation(gasStationId, pricePaid, fuelAmount, fuelType, i
     if not isFuelTypeValid(fuelType) then
         print("Invalid fuel type: "..(fuelType or "nil"))
         return false
+    end
+
+    if isStandaloneFree() then
+        return true
     end
 
     -- If not owned
@@ -349,6 +384,10 @@ function returnStockToGasStation(gasStationId, priceRefunded, fuelAmount, fuelTy
     if not isFuelTypeValid(fuelType) then
         print("Invalid fuel type: "..(fuelType or "nil"))
         return false, 0
+    end
+
+    if isStandaloneFree() then
+        return true, 0
     end
 
     -- If not owned
@@ -447,6 +486,9 @@ function isPaymentMethodValid(paymentMethod)
 end
 
 function getPlayerDiscountAmount(source)
+    if isStandaloneFree() then
+        return 0
+    end
     local job, onDuty = Utils.Framework.getPlayerJob(source)
     if onDuty and job and Config.JobDiscounts[job] then
         return Config.JobDiscounts[job]
@@ -474,6 +516,11 @@ function setVehicleFuelType(plate, fuelType)
     end
 
     playerVehiclesFuelType[plate] = fuelType
+    -- Standalone mode: keep fuel type in memory only (no DB / ownership checks)
+    if isStandaloneFree() then
+        return
+    end
+
     -- Only store in database if the vehicle is in player vehicles table
     if Config.SaveAllVehicleFuelTypes == true or (Utils.Framework.getVehicleOwner(Utils.Math.trim(plate)) ~= false or Utils.Framework.getVehicleOwner(plate) ~= false) then
         local sql = [[
@@ -486,6 +533,10 @@ function setVehicleFuelType(plate, fuelType)
 end
 
 function cacheplayerVehiclesFuelTypeType()
+    if isStandaloneFree() then
+        print("^2[lc_fuel] Standalone mode enabled: skipping DB cache^7")
+        return
+    end
     local sql = "SELECT * FROM player_vehicles_fuel_type";
     local queryData = Utils.Database.fetchAll(sql, {});
     for _, value in pairs(queryData) do
@@ -497,6 +548,11 @@ end
 function Wrapper(source,cb)
     if utils_outdated then
         TriggerClientEvent("lc_fuel:Notify",source,"error","The script requires 'lc_utils' in version "..utils_required_version..", but you currently have version "..Utils.Version..". Please update your 'lc_utils' script to the latest version: https://github.com/LeonardoSoares98/lc_utils/releases/latest/download/lc_utils.zip")
+        return
+    end
+
+    if isStandaloneFree() then
+        cb(source)
         return
     end
 
@@ -561,7 +617,12 @@ Citizen.CreateThread(function()
 end)
 
 function checkIfFrameworkWasLoaded()
-    assert(Utils.Framework.getPlayerId, "^3The framework wasn't loaded in the '^1lc_utils^3' resource. Please check if the '^1Config.framework^3' is correctly set to your framework, and make sure there are no errors in your file. For more information, refer to the documentation at '^7https://docs.lixeirocharmoso.com/^3'.^7")
+    if isStandaloneFree() then
+        return
+    end
+    if not Utils.Framework or not Utils.Framework.getPlayerId then
+        error("^3The framework wasn't loaded in the '^1lc_utils^3' resource. If you're running a standalone/vMenu server, set ^1Config.StandaloneMode = true^3 in lc_fuel config to disable framework usage. Otherwise, check '^1Config.framework^3' in lc_utils. For more information: ^7https://docs.lixeirocharmoso.com/^3'.^7")
+    end
 end
 
 function checkScriptName()
@@ -569,6 +630,9 @@ function checkScriptName()
 end
 
 function runCreateTableQueries()
+    if isStandaloneFree() then
+        return
+    end
     Utils.Database.execute([[
         CREATE TABLE IF NOT EXISTS `player_vehicles_fuel_type` (
             `plate` VARCHAR(20) NOT NULL COLLATE 'utf8_general_ci',
